@@ -136,7 +136,7 @@ class OptimalPolicy:
         if self.IsTerminalState(startState, startAction):
             return []
         
-        optimalPolicy = [Policy(startAction, 1, 0, "Even")]
+        optimalPolicy = [Policy(startState, startAction, 1, 0, "Even")]
         currentState = startState
         currentStartAction = startAction
         
@@ -156,6 +156,6 @@ class OptimalPolicy:
             goldAdv = self.GetGoldAdv(currentState, currentStartAction, nextAction)
             currentState += 1
             currentStartAction = nextAction
-            optimalPolicy.append(Policy(nextAction, probability, qValue, goldAdv))
+            optimalPolicy.append(Policy(currentState, nextAction, probability, qValue, goldAdv))
         
         return optimalPolicy

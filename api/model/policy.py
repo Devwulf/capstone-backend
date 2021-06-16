@@ -1,5 +1,6 @@
 class Policy:
-    def __init__(self, action, probability, qValue, goldAdv) -> None:
+    def __init__(self, state, action, probability, qValue, goldAdv) -> None:
+        self.state = state
         self.action = action
         self.probability = probability
         self.qValue = qValue

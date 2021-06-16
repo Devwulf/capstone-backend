@@ -4,8 +4,9 @@ from marshmallow import fields
 class PolicySchema(Schema):
     class Meta:
         # Fields to expose
-        fields = ["action", "probability", "qValue", "goldAdv"]
+        fields = ["state", "action", "probability", "qValue", "goldAdv"]
 
+    state = fields.Int()
     action = fields.Str()
     probability = fields.Float()
     qValue = fields.Float()

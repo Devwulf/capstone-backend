@@ -12,12 +12,12 @@ policy_api = Blueprint('policy', __name__)
 @swag_from({
     'responses': {
         HTTPStatus.OK.value: {
-            'description': 'Retrieves the best policies, given a starting state and action.',
+            'description': 'Returns the best policies, given a starting state and action.',
             'schema': PoliciesSchema
         }
     }
 })
-def getOptimalPolicy():
+def getOptimalPolicies():
     """
     1 liner about the route
     A more detailed description of the endpoint
@@ -25,7 +25,7 @@ def getOptimalPolicy():
     """
     team = request.args.get("team", default="Blue", type=str)
     rawState = request.args.get("state", default=0, type=int)
-    rawActions = request.args.get("actions", default="", type=str) # comma-delimited string of actions
+    rawActions = request.args.get("actions", default="bKills", type=str) # comma-delimited string of actions
 
     actions = rawActions.split(",")
     if len(actions) < 1:
@@ -38,3 +38,21 @@ def getOptimalPolicy():
     optimalPolicy = OptimalPolicy(team)
     bestPolicies = Policies(optimalPolicy.GetOptimalPolicy(state, actions[len(actions) - 1]))
     return PoliciesSchema().dump(bestPolicies), 200
+
+@policy_api.route('/next')
+@swag_from({
+    'responses': {
+        HTTPStatus.OK.value: {
+            'description': 'Returns the next actions, given a starting state and action.',
+            'schema': PoliciesSchema
+        }
+    }
+})
+def getNextPolicies():
+    team = request.args.get("team", default="Blue", type=str)
+    state = request.args.get("state", default=0, type=int)
+    action = request.args.get("action", default="bKills", type=str)
+
+    optimalPolicy = OptimalPolicy(team)
+    nextPolicies = Policies(optimalPolicy.GetNextPolicy(state, action))
+    return PoliciesSchema().dump(nextPolicies), 200

@@ -159,3 +159,18 @@ class OptimalPolicy:
             optimalPolicy.append(Policy(currentState, nextAction, probability, qValue, goldAdv))
         
         return optimalPolicy
+
+    def GetNextPolicy(self, startState, startAction):
+        if self.IsTerminalState(startState, startAction):
+            return []
+
+        nextPolicy = []
+        availableActions = self.GetRows(startState, startAction)
+        for row in availableActions.itertuples():
+            probability = self.GetProbability(row.StartState, row.StartEvent, row.EndEvent)
+            qValue = self.GetQValue(row.StartState, row.StartEvent, row.EndEvent)
+            goldAdv = self.GetGoldAdv(row.StartState, row.StartEvent, row.EndEvent)
+            policy = Policy(row.EndState, row.EndEvent, probability, qValue, goldAdv)
+            nextPolicy.append(policy)
+        
+        return nextPolicy

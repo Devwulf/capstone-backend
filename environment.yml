@@ -1,0 +1,11 @@
+name: capstone_env #Environment name
+dependencies:
+  - python=3.8
+  - pip:
+    - gunicorn # for app deployment
+    - pandas
+    - numpy
+    - flask
+    - flasgger
+    - flask-marshmallow
+    - apispec

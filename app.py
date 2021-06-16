@@ -1,6 +1,7 @@
 from flask import Flask
 from flasgger import Swagger
 from api.route.home import home_api
+from api.route.policy import policy_api
 
 def createApp():
     app = Flask(__name__)
@@ -11,6 +12,7 @@ def createApp():
     swagger = Swagger(app)
 
     app.register_blueprint(home_api, url_prefix='/api')
+    app.register_blueprint(policy_api, url_prefix="/api/policy")
 
     return app
 

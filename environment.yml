@@ -6,6 +6,7 @@ dependencies:
     - pandas
     - numpy
     - flask
+    - flask-cors
     - flasgger
     - flask-marshmallow
     - apispec

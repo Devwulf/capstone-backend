@@ -1,10 +1,13 @@
 from flask import Flask
+from flask_cors import CORS
 from flasgger import Swagger
 from api.route.home import home_api
 from api.route.policy import policy_api
 
 def createApp():
     app = Flask(__name__)
+    cors = CORS(app)
+    app.config["CORS_HEADERS"] = "Content-Type"
 
     app.config['SWAGGER'] = {
         'title': 'Capstone API',

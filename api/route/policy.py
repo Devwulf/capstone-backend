@@ -1,5 +1,6 @@
 from http import HTTPStatus
 from flask import Blueprint, request
+from flask_cors import cross_origin
 from flasgger import swag_from
 from api.model.optimalPolicy import OptimalPolicy
 from api.model.policy import Policies
@@ -9,6 +10,7 @@ policy_api = Blueprint('policy', __name__)
 
 
 @policy_api.route('/best')
+@cross_origin()
 @swag_from({
     'responses': {
         HTTPStatus.OK.value: {
@@ -40,6 +42,7 @@ def getOptimalPolicies():
     return PoliciesSchema().dump(bestPolicies), 200
 
 @policy_api.route('/next')
+@cross_origin()
 @swag_from({
     'responses': {
         HTTPStatus.OK.value: {

@@ -13,6 +13,7 @@ class OptimalPolicy:
         else:
             print(f"Error: The team '{team}' does not exist.")
 
+        self.pairedEvents = pd.read_pickle("static/pairedEventsDf.pkl")
         self.mdp = pd.read_pickle("static/mdpDf.pkl")
         self.goldAdvMdp = pd.read_pickle("static/eventsGoldAdvMdp.pkl")
         self.blueDefenses = np.array([4, 4, 4, 2]) # top, mid, bot, and nexus defenses
@@ -108,7 +109,7 @@ class OptimalPolicy:
             if "NEXUS" not in action:
                 self.redDefenses[1] = self.redDefenses[1] - 1
             else:
-                self.redDefenses[3] = self.redDefenses[3]- 1
+                self.redDefenses[3] = self.redDefenses[3] - 1
         elif "bBOT" in action:
             self.redDefenses[2] = self.redDefenses[2] - 1
         
@@ -117,6 +118,9 @@ class OptimalPolicy:
 
     def GetQValue(self, startState, startAction, endAction):
         return self.trainModel[(self.trainModel["StartState"] == startState) & (self.trainModel["StartEvent"] == startAction) & (self.trainModel["EndEvent"] == endAction)]["QValues"].iloc[0]
+
+    def GetStartProbability(self, startAction):
+        return len(self.pairedEvents[(self.pairedEvents["StartState"] == 0) & (self.pairedEvents["StartEvent"] == startAction)]) / len(self.pairedEvents[self.pairedEvents["StartState"] == 0])
 
     def GetProbability(self, startState, startAction, endAction):
         return self.mdp[(self.mdp["StartState"] == startState) & (self.mdp["StartEvent"] == startAction) & (self.mdp["EndEvent"] == endAction)]["Probability"].iloc[0]
@@ -174,3 +178,14 @@ class OptimalPolicy:
             nextPolicy.append(policy)
         
         return nextPolicy
+
+    def GetStartPolicy(self):
+        actions = self.trainModel[self.trainModel["StartState"] == 0]["StartEvent"].unique()
+        policies = []
+
+        for action in actions:
+            if (not self.IsTerminalState(0, action)) and (self.IsValidStructureAction(action)):
+                probability = self.GetStartProbability(action)
+                policies.append(Policy(0, action, probability, 0, "Even"))
+
+        return policies

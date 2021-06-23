@@ -59,3 +59,20 @@ def getNextPolicies():
     optimalPolicy = OptimalPolicy(team)
     nextPolicies = Policies(optimalPolicy.GetNextPolicy(state, action))
     return PoliciesSchema().dump(nextPolicies), 200
+    
+@policy_api.route('/start')
+@cross_origin()
+@swag_from({
+    'responses': {
+        HTTPStatus.OK.value: {
+            'description': 'Returns the next actions, given a starting state and action.',
+            'schema': PoliciesSchema
+        }
+    }
+})
+def getStartPolicies():
+    team = request.args.get("team", default="Blue", type=str)
+
+    optimalPolicy = OptimalPolicy(team)
+    nextPolicies = Policies(optimalPolicy.GetStartPolicy())
+    return PoliciesSchema().dump(nextPolicies), 200

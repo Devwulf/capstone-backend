@@ -164,6 +164,47 @@ class OptimalPolicy:
         
         return optimalPolicy
 
+    def GetOptimalPolicyFromActions(self, startState, actions):
+        if len(actions) <= 0:
+            return []
+        elif len(actions) == 1:
+            return self.GetOptimalPolicy(startState, actions[0])
+        
+        optimalPolicy = [Policy(0, actions[0], 1, 0, "Even")]
+        for i, action in enumerate(actions[:-1]):
+            if (self.IsTerminalState(i, action)) or (not self.IsValidStructureAction(action)):
+                return []
+
+            self.UpdateStructures(action)
+            nextAction = actions[i + 1]
+            qValue = self.GetQValue(i, action, nextAction)
+            probability = self.GetProbability(i, action, nextAction)
+            goldAdv = self.GetGoldAdv(i, action, nextAction)
+            optimalPolicy.append(Policy(i, nextAction, probability, qValue, goldAdv))
+
+        currentState = len(actions) - 1
+        currentStartAction = actions[-1]
+        
+        while not self.IsTerminalState(currentState, currentStartAction):
+            self.UpdateStructures(currentStartAction)
+            availableActions = self.GetRows(currentState, currentStartAction).sort_values("QValues", ascending=False)
+            nextAction = None
+            for row in availableActions.itertuples():
+                if self.IsValidStructureAction(row.EndEvent):
+                    nextAction = row.EndEvent
+                    break
+            #nextAction = GetNextAction(team, currentState, currentStartAction, 1.)
+            if nextAction is None:
+                return optimalPolicy
+            qValue = self.GetQValue(currentState, currentStartAction, nextAction)
+            probability = self.GetProbability(currentState, currentStartAction, nextAction)
+            goldAdv = self.GetGoldAdv(currentState, currentStartAction, nextAction)
+            currentState += 1
+            currentStartAction = nextAction
+            optimalPolicy.append(Policy(currentState, nextAction, probability, qValue, goldAdv))
+        
+        return optimalPolicy
+
     def GetNextPolicy(self, startState, startAction):
         if self.IsTerminalState(startState, startAction):
             return []

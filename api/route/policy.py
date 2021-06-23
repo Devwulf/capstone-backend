@@ -30,15 +30,12 @@ def getOptimalPolicies():
     rawActions = request.args.get("actions", default="bKills", type=str) # comma-delimited string of actions
 
     actions = rawActions.split(",")
+    state = rawState
     if len(actions) < 1:
         state = 0
-    elif len(actions) == 1:
-        state = rawState
-    else:
-        state = rawState + len(actions) - 1
 
     optimalPolicy = OptimalPolicy(team)
-    bestPolicies = Policies(optimalPolicy.GetOptimalPolicy(state, actions[len(actions) - 1]))
+    bestPolicies = Policies(optimalPolicy.GetOptimalPolicyFromActions(state, actions))
     return PoliciesSchema().dump(bestPolicies), 200
 
 @policy_api.route('/next')

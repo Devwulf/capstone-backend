@@ -9,4 +9,6 @@ dependencies:
     - flask-cors
     - flasgger
     - flask-marshmallow
+    - flask-security
+    - flask-sqlalchemy
     - apispec

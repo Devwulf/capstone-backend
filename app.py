@@ -9,17 +9,21 @@ def createApp():
     cors = CORS(app)
     app.config["CORS_HEADERS"] = "Content-Type"
 
-    app.config['SWAGGER'] = {
-        'title': 'Capstone API',
+    # Authentication
+    app.config["DEBUG"] = True
+    app.config["SECRET_KEY"] = "super-secret"
+
+    app.config["SWAGGER"] = {
+        "title": "Capstone API",
     }
     swagger = Swagger(app)
 
-    app.register_blueprint(home_api, url_prefix='/api')
+    app.register_blueprint(home_api, url_prefix="/api")
     app.register_blueprint(policy_api, url_prefix="/api/policy")
 
     return app
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = createApp()
     # Threaded option to enable multiple instances for multiple user access support
     app.run(threaded=True, port=5000)

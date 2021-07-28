@@ -35,7 +35,9 @@ def login_user():
         return make_response("could not verify", 401, {"WWW.Authentication": "Basic realm: 'login required'"})    
 
     user = User.query.filter_by(username=auth.username).first()   
-     
+    if not user or not user.username or not user.password:
+        return make_response("could not verify", 401, {"WWW.Authentication": "Basic realm: 'login required'"})    
+
     if check_password_hash(user.password, auth.password):  
         token = jwt.encode({"id": user.id, "exp" : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, current_app.config["SECRET_KEY"], algorithm="HS256")  
         return jsonify({"token" : token}) 

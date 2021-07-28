@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from flask import Blueprint, request, current_app, jsonify, make_response
 from flasgger import swag_from
+from flask_cors.decorator import cross_origin
 from werkzeug.security import generate_password_hash, check_password_hash
 from auth.services.database import db_session
 from auth.models.models import User
@@ -11,6 +12,7 @@ import datetime
 auth_api = Blueprint("auth", __name__)
 
 @auth_api.route("/register", methods=["POST"])
+@cross_origin()
 def signup_user():  
     data = request.get_json()
     existing_user = User.query.filter_by(username=data["username"]).first()
@@ -24,8 +26,8 @@ def signup_user():
     db_session.commit()
     return jsonify({"message": "registered successfully"})
 
-
-@auth_api.route("/login", methods=["POST"])  
+@auth_api.route("/login", methods=["POST"])
+@cross_origin()
 def login_user(): 
     auth = request.authorization   
 
@@ -38,9 +40,10 @@ def login_user():
         token = jwt.encode({"id": user.id, "exp" : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, current_app.config["SECRET_KEY"], algorithm="HS256")  
         return jsonify({"token" : token}) 
 
-    return make_response("could not verify",  401, {"WWW.Authentication": "Basic realm: 'login required'"})
+    return make_response("could not verify", 401, {"WWW.Authentication": "Basic realm: 'login required'"})
 
 @auth_api.route("/token", methods=["GET"])
+@cross_origin()
 def check_valid_token():
     token = None 
 
@@ -48,7 +51,7 @@ def check_valid_token():
         token = request.headers["x-access-tokens"] 
     
     if not token:  
-        return jsonify({"message": "a valid token is missing"}) 
+        return make_response("a valid token is missing", 400, {"WWW.Authentication": "Basic realm: 'login required'"}) 
 
     try:
         data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])

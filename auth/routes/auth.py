@@ -10,7 +10,7 @@ import datetime
 
 auth_api = Blueprint("auth", __name__)
 
-@auth_api.route("/register", methods=["GET", "POST"])
+@auth_api.route("/register", methods=["POST"])
 def signup_user():  
     data = request.get_json()
     existing_user = User.query.filter_by(username=data["username"]).first()
@@ -39,3 +39,20 @@ def login_user():
         return jsonify({"token" : token}) 
 
     return make_response("could not verify",  401, {"WWW.Authentication": "Basic realm: 'login required'"})
+
+@auth_api.route("/token", methods=["GET"])
+def check_valid_token():
+    token = None 
+
+    if "x-access-tokens" in request.headers:  
+        token = request.headers["x-access-tokens"] 
+    
+    if not token:  
+        return jsonify({"message": "a valid token is missing"}) 
+
+    try:
+        data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
+    except:
+        return jsonify({"message": "invalid token"})
+
+    return jsonify({"message": "valid token"})

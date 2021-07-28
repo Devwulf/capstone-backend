@@ -1,6 +1,6 @@
 from flask import request, jsonify, current_app
 from functools import wraps
-from models import User
+from auth.models.models import User
 import jwt
 
 # Creates a decorator that automatically checks tokens from a given
@@ -17,7 +17,7 @@ def token_required(f):
             return jsonify({"message": "a valid token is missing"})   
 
         try:  
-            data = jwt.decode(token, current_app.config["SECRET_KEY"])
+            data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
             current_user = User.query.filter_by(id=data["id"]).first()  
         except:  
             return jsonify({"message": "token is invalid"})  

@@ -1,3 +1,4 @@
+from auth.utils.decorators import token_required
 from http import HTTPStatus
 from flask import Blueprint, request
 from flask_cors import cross_origin
@@ -11,6 +12,7 @@ policy_api = Blueprint('policy', __name__)
 
 @policy_api.route('/best')
 @cross_origin()
+@token_required
 @swag_from({
     'responses': {
         HTTPStatus.OK.value: {
@@ -19,7 +21,7 @@ policy_api = Blueprint('policy', __name__)
         }
     }
 })
-def getOptimalPolicies():
+def getOptimalPolicies(currentUser):
     """
     1 liner about the route
     A more detailed description of the endpoint
@@ -40,6 +42,7 @@ def getOptimalPolicies():
 
 @policy_api.route('/next')
 @cross_origin()
+@token_required
 @swag_from({
     'responses': {
         HTTPStatus.OK.value: {
@@ -48,7 +51,7 @@ def getOptimalPolicies():
         }
     }
 })
-def getNextPolicies():
+def getNextPolicies(currentUser):
     team = request.args.get("team", default="Blue", type=str)
     state = request.args.get("state", default=0, type=int)
     action = request.args.get("action", default="bKills", type=str)
@@ -59,6 +62,7 @@ def getNextPolicies():
     
 @policy_api.route('/start')
 @cross_origin()
+@token_required
 @swag_from({
     'responses': {
         HTTPStatus.OK.value: {
@@ -67,7 +71,7 @@ def getNextPolicies():
         }
     }
 })
-def getStartPolicies():
+def getStartPolicies(currentUser):
     team = request.args.get("team", default="Blue", type=str)
 
     optimalPolicy = OptimalPolicy(team)

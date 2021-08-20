@@ -3,7 +3,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.pool import StaticPool
 
-engine = create_engine('sqlite://', \
+engine = create_engine('sqlite://',
                         convert_unicode=True,
                         connect_args={"check_same_thread": False}, # only for in-memory databases
                         poolclass=StaticPool) # only for in-memory databases

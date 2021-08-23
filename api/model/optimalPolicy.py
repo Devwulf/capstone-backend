@@ -1,21 +1,11 @@
+from api.model.dbModels import BlueQValue, Probability, RedQValue
 import pandas as pd
 import numpy as np
 from api.model.policy import Policy
 
 class OptimalPolicy:
     def __init__(self, team) -> None:
-        if team == "Blue":
-            self.team = "Blue"
-            self.trainModel = pd.read_pickle("static/blueTrainedwGoldAdv.pkl")
-        elif team == "Red":
-            self.team = "Red"
-            self.trainModel = pd.read_pickle("static/redTrainedwGoldAdv.pkl")
-        else:
-            print(f"Error: The team '{team}' does not exist.")
-
-        self.pairedEvents = pd.read_pickle("static/pairedEventsDf.pkl")
-        self.mdp = pd.read_pickle("static/mdpDf.pkl")
-        self.goldAdvMdp = pd.read_pickle("static/eventsGoldAdvMdp.pkl")
+        self.team = team
         self.blueDefenses = np.array([4, 4, 4, 2]) # top, mid, bot, and nexus defenses
         self.redDefenses = np.array([4, 4, 4, 2])
 
@@ -114,24 +104,37 @@ class OptimalPolicy:
             self.redDefenses[2] = self.redDefenses[2] - 1
         
     def GetRows(self, startState, startAction):
-        return self.trainModel[(self.trainModel["StartState"] == startState) & (self.trainModel["StartEvent"] == startAction)]
+        if self.team == "Blue":
+            items = BlueQValue.query.filter((BlueQValue.startState == startState) & (BlueQValue.startEvent == startAction)).all()
+        else:
+            items = RedQValue.query.filter((RedQValue.startState == startState) & (RedQValue.startEvent == startAction)).all()
+        return items
 
     def GetQValue(self, startState, startAction, endAction):
-        return self.trainModel[(self.trainModel["StartState"] == startState) & (self.trainModel["StartEvent"] == startAction) & (self.trainModel["EndEvent"] == endAction)]["QValues"].iloc[0]
+        if self.team == "Blue":
+            item = BlueQValue.query.filter((BlueQValue.startState == startState) & (BlueQValue.startEvent == startAction) & (BlueQValue.endEvent == endAction)).first()
+        else:
+            item = RedQValue.query.filter((RedQValue.startState == startState) & (RedQValue.startEvent == startAction) & (RedQValue.endEvent == endAction)).first()
+        return item.qValue if item is not None else 0
 
     def GetStartProbability(self, startAction):
-        return len(self.pairedEvents[(self.pairedEvents["StartState"] == 0) & (self.pairedEvents["StartEvent"] == startAction)]) / len(self.pairedEvents[self.pairedEvents["StartState"] == 0])
+        item = Probability.query.filter((Probability.startState == -1) & (Probability.startEvent == startAction)).first()
+        return item.prob if item is not None else 0
 
     def GetProbability(self, startState, startAction, endAction):
-        return self.mdp[(self.mdp["StartState"] == startState) & (self.mdp["StartEvent"] == startAction) & (self.mdp["EndEvent"] == endAction)]["Probability"].iloc[0]
+        item = Probability.query.filter((Probability.startState == startState) & (Probability.startEvent == startAction) & (Probability.endEvent == endAction)).first()
+        return item.prob if item is not None else 0
 
     def GetGoldAdv(self, startState, startAction, endAction):
-        row = self.goldAdvMdp[(self.goldAdvMdp["StartState"] == startState) & (self.goldAdvMdp["StartEvent"] == startAction) & (self.goldAdvMdp["EndEvent"] == endAction)]
-        probabilities = [row["bAdvFar"].iloc[0], row["bAdvClose"].iloc[0], row["Even"].iloc[0], row["rAdvClose"].iloc[0], row["rAdvFar"].iloc[0]]
-        if np.sum(probabilities) == 0:
+        item = Probability.query.filter((Probability.startState == startState) & (Probability.startEvent == startAction) & (Probability.endEvent == endAction)).first()
+        if item is None:
             choice = np.random.randint(0, 5)
         else:
-            choice = np.random.choice(5, p=probabilities)
+            probabilities = [item.bAdvFar, item.bAdvClose, item.even, item.rAdvClose, item.rAdvFar]
+            if np.sum(probabilities) == 0:
+                choice = np.random.randint(0, 5)
+            else:
+                choice = np.random.choice(5, p=probabilities)
         
         choices = ["bAdvFar", "bAdvClose", "Even", "rAdvClose", "rAdvFar"]
         return choices[choice]
@@ -146,11 +149,11 @@ class OptimalPolicy:
         
         while not self.IsTerminalState(currentState, currentStartAction):
             self.UpdateStructures(currentStartAction)
-            availableActions = self.GetRows(currentState, currentStartAction).sort_values("QValues", ascending=False)
+            availableActions = sorted(self.GetRows(currentState, currentStartAction), key=lambda x: x.qValue, reverse=True)
             nextAction = None
-            for row in availableActions.itertuples():
-                if self.IsValidStructureAction(row.EndEvent):
-                    nextAction = row.EndEvent
+            for row in availableActions:
+                if self.IsValidStructureAction(row.endEvent):
+                    nextAction = row.endEvent
                     break
             #nextAction = GetNextAction(team, currentState, currentStartAction, 1.)
             if nextAction is None:
@@ -187,11 +190,11 @@ class OptimalPolicy:
         
         while not self.IsTerminalState(currentState, currentStartAction):
             self.UpdateStructures(currentStartAction)
-            availableActions = self.GetRows(currentState, currentStartAction).sort_values("QValues", ascending=False)
+            availableActions = sorted(self.GetRows(currentState, currentStartAction), key=lambda x: x.qValue, reverse=True)
             nextAction = None
-            for row in availableActions.itertuples():
-                if self.IsValidStructureAction(row.EndEvent):
-                    nextAction = row.EndEvent
+            for row in availableActions:
+                if self.IsValidStructureAction(row.endEvent):
+                    nextAction = row.endEvent
                     break
             #nextAction = GetNextAction(team, currentState, currentStartAction, 1.)
             if nextAction is None:
@@ -211,20 +214,21 @@ class OptimalPolicy:
 
         nextPolicy = []
         availableActions = self.GetRows(startState, startAction)
-        for row in availableActions.itertuples():
-            probability = self.GetProbability(row.StartState, row.StartEvent, row.EndEvent)
-            qValue = self.GetQValue(row.StartState, row.StartEvent, row.EndEvent)
-            goldAdv = self.GetGoldAdv(row.StartState, row.StartEvent, row.EndEvent)
-            policy = Policy(row.EndState, row.EndEvent, probability, qValue, goldAdv)
+        for row in availableActions:
+            probability = self.GetProbability(row.startState, row.startEvent, row.endEvent)
+            qValue = self.GetQValue(row.startState, row.startEvent, row.endEvent)
+            goldAdv = self.GetGoldAdv(row.startState, row.startEvent, row.endEvent)
+            policy = Policy(row.startState + 1, row.endEvent, probability, qValue, goldAdv)
             nextPolicy.append(policy)
         
         return nextPolicy
 
     def GetStartPolicy(self):
-        actions = self.trainModel[self.trainModel["StartState"] == 0]["StartEvent"].unique()
+        actions = Probability.query.filter(Probability.startState == -1).all()
         policies = []
 
-        for action in actions:
+        for actionObj in actions:
+            action = actionObj.endEvent
             if (not self.IsTerminalState(0, action)) and (self.IsValidStructureAction(action)):
                 probability = self.GetStartProbability(action)
                 policies.append(Policy(0, action, probability, 0, "Even"))

@@ -1,4 +1,4 @@
-name: capstone_env #Environment name
+name: capstone_001233960 #Environment name
 dependencies:
   - python=3.8
   - pip:

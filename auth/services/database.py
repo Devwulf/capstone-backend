@@ -1,12 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.pool import StaticPool
+import os
 
-engine = create_engine('sqlite://',
-                        convert_unicode=True,
-                        connect_args={"check_same_thread": False}, # only for in-memory databases
-                        poolclass=StaticPool) # only for in-memory databases
+file_path = os.path.abspath(os.getcwd())+"/db/database.db"
+engine = create_engine('sqlite:///' + file_path,
+                        convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
@@ -19,3 +18,4 @@ def init_db():
     # you will have to import them first before calling init_db()
     import auth.models.models
     Base.metadata.create_all(bind=engine)
+

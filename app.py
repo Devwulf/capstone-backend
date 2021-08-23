@@ -1,11 +1,9 @@
 from flask import Flask
 from flask_cors import CORS
 from flasgger import Swagger
-from api.route.home import home_api
 from api.route.policy import policy_api
 from auth.routes.auth import auth_api
-from services.database import db_session, init_db, init_model_db
-from auth.models.models import User, Role
+from services.database import init_db, init_model_db
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -20,7 +18,6 @@ app.config["SWAGGER"] = {
 }
 swagger = Swagger(app)
 
-app.register_blueprint(home_api, url_prefix="/api")
 app.register_blueprint(policy_api, url_prefix="/api/policy")
 app.register_blueprint(auth_api, url_prefix="/auth")
 

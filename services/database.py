@@ -23,8 +23,8 @@ def init_db():
 def init_model_db():
     from api.model.dbModels import BlueQValue, RedQValue, Probability
     import pandas as pd
-    blueMdp = pd.read_pickle("static/blueTrainedwGoldAdv.pkl")
-    redMdp = pd.read_pickle("static/redTrainedwGoldAdv.pkl")
+    blueMdp = pd.read_pickle("static/blueTrained.pkl")
+    redMdp = pd.read_pickle("static/redTrained.pkl")
     goldAdv = pd.read_pickle("static/eventsGoldAdvMdp.pkl")
     pairedEvents = pd.read_pickle("static/pairedEventsDf.pkl")
     pairedEvents = pairedEvents[pairedEvents["StartState"] == 0]

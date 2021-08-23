@@ -3,7 +3,7 @@ from flask import Blueprint, request, current_app, jsonify, make_response
 from flasgger import swag_from
 from flask_cors.decorator import cross_origin
 from werkzeug.security import generate_password_hash, check_password_hash
-from auth.services.database import db_session
+from services.database import db_session
 from auth.models.models import User
 import uuid
 import jwt

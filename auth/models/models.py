@@ -1,4 +1,4 @@
-from auth.services.database import Base
+from services.database import Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Boolean, DateTime, Column, Integer, \

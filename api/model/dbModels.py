@@ -10,6 +10,7 @@ class BlueQValue(Base):
     startEvent = Column(String(255), index=True)
     endEvent = Column(String(255), index=True)
     qValue = Column(Float)
+    probability = Column(Float)
 
 class RedQValue(Base):
     __tablename__ = 'redQValue'
@@ -18,6 +19,7 @@ class RedQValue(Base):
     startEvent = Column(String(255), index=True)
     endEvent = Column(String(255), index=True)
     qValue = Column(Float)
+    probability = Column(Float)
 
 class Probability(Base):
     __tablename__ = 'probability'

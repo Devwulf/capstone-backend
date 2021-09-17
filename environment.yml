@@ -10,6 +10,9 @@ dependencies:
     - flasgger==0.9.5
     - flask-marshmallow==0.14.0
     - flask-sqlalchemy==2.5.1
+    - marshmallow-sqlalchemy==0.26.1
+    - requests==2.26.0
     - pyjwt==2.1.0
     - uuid==1.30
     - apispec==4.7.1
+    - pytest==6.2.5

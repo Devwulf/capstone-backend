@@ -4,8 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import os
 
 file_path = os.path.abspath(os.getcwd())+"/db/database.db"
-engine = create_engine('sqlite:///' + file_path,
-                        convert_unicode=True)
+engine = create_engine('sqlite:///' + file_path)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
@@ -39,7 +38,8 @@ def init_model_db():
             db_session.add(BlueQValue(startState=row.StartState, 
                                       startEvent=row.StartEvent, 
                                       endEvent=row.EndEvent, 
-                                      qValue=row.QValues))
+                                      qValue=row.QValues,
+                                      probability=row.Probability))
         db_session.commit()
 
     # Processes the pre-trained model for the Red team
@@ -48,7 +48,8 @@ def init_model_db():
             db_session.add(RedQValue(startState=row.StartState, 
                                      startEvent=row.StartEvent, 
                                      endEvent=row.EndEvent, 
-                                     qValue=row.QValues))
+                                     qValue=row.QValues,
+                                     probability=row.Probability))
         db_session.commit()
 
     if Probability.query.first() is None:

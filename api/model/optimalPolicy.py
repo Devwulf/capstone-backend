@@ -1,7 +1,10 @@
+from api.model.graphs import LabeledGraph, LabeledPoint, TwoDGraph, TwoDPoint
 from api.model.dbModels import BlueQValue, Probability, RedQValue
+from api.model.policy import Policy
+from services.database import db_session
+from sqlalchemy.sql import func
 import pandas as pd
 import numpy as np
-from api.model.policy import Policy
 
 class OptimalPolicy:
     def __init__(self, team) -> None:
@@ -234,3 +237,61 @@ class OptimalPolicy:
                 policies.append(Policy(0, action, probability, 0, "Even"))
 
         return policies
+
+    def GetLineGraph(self, endAction, isProbability=True):
+        if self.team == "Blue":
+            if isProbability:
+                items = db_session.query(BlueQValue.startState, func.avg(BlueQValue.probability)
+                                 ).filter(BlueQValue.endEvent == endAction
+                                 ).group_by(BlueQValue.startState, BlueQValue.endEvent
+                                 ).all()
+            else:
+                items = db_session.query(BlueQValue.startState, func.avg(BlueQValue.qValue)
+                                 ).filter(BlueQValue.endEvent == endAction
+                                 ).group_by(BlueQValue.startState, BlueQValue.endEvent
+                                 ).all()
+        else:
+            if isProbability:
+                items = db_session.query(RedQValue.startState, func.avg(RedQValue.probability)
+                                 ).filter(RedQValue.endEvent == endAction
+                                 ).group_by(RedQValue.startState, RedQValue.endEvent
+                                 ).all()
+            else:
+                items = db_session.query(RedQValue.startState, func.avg(RedQValue.qValue)
+                                 ).filter(RedQValue.endEvent == endAction
+                                 ).group_by(RedQValue.startState, RedQValue.endEvent
+                                 ).all()
+        
+        points = []
+        for item in items:
+            points.append(TwoDPoint(item[0], item[1]))
+        
+        graph = TwoDGraph(points)
+        return graph
+
+    def GetPieChart(self, startState, startAction, hasKills=True):
+        if self.team == "Blue":
+            if hasKills:
+                items = db_session.query(BlueQValue.endEvent, BlueQValue.probability
+                                 ).filter((BlueQValue.startState == startState) & (BlueQValue.startEvent == startAction)
+                                 ).all()
+            else:
+                items = db_session.query(BlueQValue.endEvent, BlueQValue.probability
+                                 ).filter((BlueQValue.startState == startState) & (BlueQValue.startEvent == startAction) & (BlueQValue.endEvent != "bKills") & (BlueQValue.endEvent != "rKills")
+                                 ).all()
+        else:
+            if hasKills:
+                items = db_session.query(RedQValue.endEvent, RedQValue.probability
+                                 ).filter((RedQValue.startState == startState) & (RedQValue.startEvent == startAction)
+                                 ).all()
+            else:
+                items = db_session.query(RedQValue.endEvent, RedQValue.probability
+                                 ).filter((RedQValue.startState == startState) & (RedQValue.startEvent == startAction) & (RedQValue.endEvent != "bKills") & (RedQValue.endEvent != "rKills")
+                                 ).all()
+
+        points = []
+        for item in items:
+            points.append(LabeledPoint(item[0], item[1]))
+        
+        graph = LabeledGraph(points)
+        return graph

@@ -27,6 +27,34 @@ def test_getOptimalPolicies(test_client):
     })
     assert b"policies" in rv.data
 
+def test_getNextPolicies(test_client):
+    token = login(test_client)
+    assert b"token" in token.data
+
+    tokenObj = json.loads(token.data)
+    rv = test_client.get("/api/policy/next", headers={
+        "X-Access-Tokens": tokenObj["token"]
+    },
+    query_string={
+        "team": "Blue",
+        "state": 0,
+        "action": "bKills"
+    })
+    assert b"policies" in rv.data
+
+def test_getStartPolicies(test_client):
+    token = login(test_client)
+    assert b"token" in token.data
+
+    tokenObj = json.loads(token.data)
+    rv = test_client.get("/api/policy/start", headers={
+        "X-Access-Tokens": tokenObj["token"]
+    },
+    query_string={
+        "team": "Blue"
+    })
+    assert b"policies" in rv.data
+
 def test_getLineGraph(test_client):
     token = login(test_client)
     assert b"token" in token.data
@@ -59,10 +87,55 @@ def test_getPieChart(test_client):
     assert b"points" in rv.data
 
 # Model tests
+def test_GetRows(test_client):
+    optimal = OptimalPolicy("Blue")
+    items = optimal.GetRows(0, "bKills")
+    assert items is not None
+    assert len(items) > 0
+
+def test_GetQValue(test_client):
+    optimal = OptimalPolicy("Blue")
+    result = optimal.GetQValue(0, "bKills", "rKills")
+    assert result > 0
+
+def test_GetStartProbability(test_client):
+    optimal = OptimalPolicy("Blue")
+    result = optimal.GetStartProbability("bKills")
+    assert result > 0
+
+def test_GetProbability(test_client):
+    optimal = OptimalPolicy("Blue")
+    result = optimal.GetProbability(0, "bKills", "rKills")
+    assert result > 0
+    
+def test_GetGoldAdv(test_client):
+    optimal = OptimalPolicy("Blue")
+    result = optimal.GetGoldAdv(0, "bKills", "rKills")
+    assert result in ["bAdvFar", "bAdvClose", "Even", "rAdvClose", "rAdvFar"]
+
 def test_GetOptimalPolicy(test_client):
     optimal = OptimalPolicy("Blue")
-    policy = optimal.GetOptimalPolicy(0, "bKills")
-    assert policy[0].action == "bKills"
+    result = optimal.GetOptimalPolicy(0, "bKills")
+    assert result is not None
+    assert len(result) > 0
+
+def test_GetOptimalPolicyFromActions(test_client):
+    optimal = OptimalPolicy("Blue")
+    result = optimal.GetOptimalPolicyFromActions(0, ["bKills", "rKills"])
+    assert result is not None
+    assert len(result) > 0
+
+def test_GetNextPolicy(test_client):
+    optimal = OptimalPolicy("Blue")
+    result = optimal.GetNextPolicy(0, "bKills")
+    assert result is not None
+    assert len(result) > 0
+
+def test_GetStartPolicy(test_client):
+    optimal = OptimalPolicy("Blue")
+    result = optimal.GetStartPolicy()
+    assert result is not None
+    assert len(result) > 0
 
 def test_GetLineGraph(test_client):
     optimal = OptimalPolicy("Blue")

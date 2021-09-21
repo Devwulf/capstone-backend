@@ -120,8 +120,8 @@ class OptimalPolicy:
             item = RedQValue.query.filter((RedQValue.startState == startState) & (RedQValue.startEvent == startAction) & (RedQValue.endEvent == endAction)).first()
         return item.qValue if item is not None else 0
 
-    def GetStartProbability(self, startAction):
-        item = Probability.query.filter((Probability.startState == -1) & (Probability.startEvent == startAction)).first()
+    def GetStartProbability(self, action):
+        item = Probability.query.filter((Probability.startState == -1) & (Probability.endEvent == action)).first()
         return item.prob if item is not None else 0
 
     def GetProbability(self, startState, startAction, endAction):

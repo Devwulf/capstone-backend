@@ -94,7 +94,8 @@ def getStartPolicies(currentUser):
 def getLineGraph(currentUser):
     team = request.args.get("team", default="Blue", type=str)
     endAction = request.args.get("endAction", default="bKills", type=str)
-    isProbability = request.args.get("isProbability", default=True, type=bool)
+    # Use lambda function to compare if string equals 'true' instead
+    isProbability = request.args.get("isProbability", default=True, type=lambda x: x.lower() == "true")
 
     optimalPolicy = OptimalPolicy(team)
     graph = optimalPolicy.GetLineGraph(endAction, isProbability)
@@ -115,7 +116,7 @@ def getPieChart(currentUser):
     team = request.args.get("team", default="Blue", type=str)
     startState = request.args.get("startState", default=0, type=int)
     startAction = request.args.get("startAction", default="bKills", type=str)
-    hasKills = request.args.get("hasKills", default=True, type=bool)
+    hasKills = request.args.get("hasKills", default=True, type=lambda x: x.lower() == "true")
 
     optimalPolicy = OptimalPolicy(team)
     graph = optimalPolicy.GetPieChart(startState, startAction, hasKills)

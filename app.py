@@ -5,7 +5,7 @@ from api.route.policy import policy_api
 from auth.routes.auth import auth_api
 from services.database import init_db, init_model_db, init_auth
 import pytest
-import os
+import logging
 
 class CustomApp(Flask):
     def run(self, host=None, port=None, debug=None, load_dotenv=True, **options):
@@ -19,6 +19,9 @@ def create_app(test_config=None):
     app = CustomApp(__name__)
     cors = CORS(app)
     app.config["CORS_HEADERS"] = "Content-Type"
+
+    # Setup file logging
+    logging.basicConfig(filename="./logs/record.log", level=logging.DEBUG, format=f"[%(asctime)s] %(levelname)s (%(threadName)s) - %(message)s")
 
     # Authentication
     app.config["DEBUG"] = True

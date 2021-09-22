@@ -9,17 +9,16 @@ from api.model.optimalPolicy import OptimalPolicy
 from api.model.policy import Policies
 from api.schema.policy import PoliciesSchema
 
-policy_api = Blueprint('policy', __name__)
+policy_api = Blueprint("policy", __name__)
 
-
-@policy_api.route('/best')
+@policy_api.route("/best")
 @cross_origin()
 @token_required
 @swag_from({
-    'responses': {
+    "responses": {
         HTTPStatus.OK.value: {
-            'description': 'Returns the best policies, given a starting state and action.',
-            'schema': PoliciesSchema
+            "description": "Returns the best policies, given a starting state and action.",
+            "schema": PoliciesSchema
         }
     }
 })
@@ -42,14 +41,14 @@ def getOptimalPolicies(currentUser):
     bestPolicies = Policies(optimalPolicy.GetOptimalPolicyFromActions(state, actions))
     return PoliciesSchema().dump(bestPolicies), 200
 
-@policy_api.route('/next')
+@policy_api.route("/next")
 @cross_origin()
 @token_required
 @swag_from({
-    'responses': {
+    "responses": {
         HTTPStatus.OK.value: {
-            'description': 'Returns the next actions, given a starting state and action.',
-            'schema': PoliciesSchema
+            "description": "Returns the next actions, given a starting state and action.",
+            "schema": PoliciesSchema
         }
     }
 })
@@ -62,14 +61,14 @@ def getNextPolicies(currentUser):
     nextPolicies = Policies(optimalPolicy.GetNextPolicy(state, action))
     return PoliciesSchema().dump(nextPolicies), 200
     
-@policy_api.route('/start')
+@policy_api.route("/start")
 @cross_origin()
 @token_required
 @swag_from({
-    'responses': {
+    "responses": {
         HTTPStatus.OK.value: {
-            'description': 'Returns the next actions, given a starting state and action.',
-            'schema': PoliciesSchema
+            "description": "Returns the next actions, given a starting state and action.",
+            "schema": PoliciesSchema
         }
     }
 })
@@ -80,35 +79,35 @@ def getStartPolicies(currentUser):
     nextPolicies = Policies(optimalPolicy.GetStartPolicy())
     return PoliciesSchema().dump(nextPolicies), 200
 
-@policy_api.route('/line')
+@policy_api.route("/line")
 @cross_origin()
 @token_required
 @swag_from({
-    'responses': {
+    "responses": {
         HTTPStatus.OK.value: {
-            'description': 'Returns the preprocessed data representing a line graph, given an end action and if the probability graph is wanted',
-            'schema': TwoDGraphSchema
+            "description": "Returns the preprocessed data representing a line graph, given an end action and if the probability graph is wanted",
+            "schema": TwoDGraphSchema
         }
     }
 })
 def getLineGraph(currentUser):
     team = request.args.get("team", default="Blue", type=str)
     endAction = request.args.get("endAction", default="bKills", type=str)
-    # Use lambda function to compare if string equals 'true' instead
+    # Use lambda function to compare if string equals "true" instead
     isProbability = request.args.get("isProbability", default=True, type=lambda x: x.lower() == "true")
 
     optimalPolicy = OptimalPolicy(team)
     graph = optimalPolicy.GetLineGraph(endAction, isProbability)
     return TwoDGraphSchema().dump(graph), 200
 
-@policy_api.route('/pie')
+@policy_api.route("/pie")
 @cross_origin()
 @token_required
 @swag_from({
-    'responses': {
+    "responses": {
         HTTPStatus.OK.value: {
-            'description': 'Returns the preprocessed data representing a pie chart, given a start state, start action, and if kills should be included',
-            'schema': LabeledGraphSchema
+            "description": "Returns the preprocessed data representing a pie chart, given a start state, start action, and if kills should be included",
+            "schema": LabeledGraphSchema
         }
     }
 })

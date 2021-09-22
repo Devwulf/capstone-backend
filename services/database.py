@@ -1,9 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from flask import current_app
 import os
 
-file_path = os.path.abspath(os.getcwd())+"/db/database.db"
+file_path = os.path.abspath(os.getcwd())+"/db/database.db?check_same_thread=False"
 engine = create_engine('sqlite:///' + file_path)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -20,7 +21,7 @@ def init_db():
     Base.metadata.create_all(bind=engine)
 
 def init_model_db():
-    print("Setting up the trained model database...")
+    current_app.logger.info("Database: Setting up the trained model database...")
 
     from api.model.dbModels import BlueQValue, RedQValue, Probability
     import pandas as pd
@@ -73,7 +74,7 @@ def init_model_db():
                                        rAdvFar=goldRow.rAdvFar))
         db_session.commit()
 
-    print("Finished setting up the trained model database!")
+    current_app.logger.info("Database: Finished setting up the trained model database!")
 
 def init_auth():
     from auth.models.models import User

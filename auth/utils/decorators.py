@@ -13,13 +13,15 @@ def token_required(f):
         if "x-access-tokens" in request.headers:  
           token = request.headers["x-access-tokens"] 
 
-        if not token:  
+        if not token:
+            current_app.logger.warning("TokenDecorator: Token could not be found from header.")
             return jsonify({"message": "a valid token is missing"})   
 
         try:  
             data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
             current_user = User.query.filter_by(id=data["id"]).first()  
-        except:  
+        except:
+            current_app.logger.warning("TokenDecorator: Token '%s' is invalid.", token)
             return jsonify({"message": "token is invalid"})  
 
         return f(current_user, *args,  **kwargs)

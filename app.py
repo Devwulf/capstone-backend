@@ -52,7 +52,7 @@ def test_client():
             init_auth()
         yield client
 
+app = create_app()
 if __name__ == "__main__":
     # Threaded option to enable multiple instances for multiple user access support
-    app = create_app()
     app.run(threaded=True, port=5000)

@@ -16,3 +16,5 @@ dependencies:
     - uuid==1.30
     - apispec==4.7.1
     - pytest==6.2.5
+    - sklearn
+    - statsmodels

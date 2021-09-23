@@ -17,4 +17,4 @@ dependencies:
     - apispec==4.7.1
     - pytest==6.2.5
     - sklearn
-    - statsmodels
+    - statsmodels==0.12.2
